@@ -2,7 +2,9 @@
 title: Tcp中的SR(选择重传)
 date: 2021-09-09 15:09:13
 tags: 网络
-categories: 网络
+categories: 
+  - 技术笔记
+  - 网络
 banner_img: /img/tcp_sr.jpeg
 index_img: /img/tcp_sr.jpeg
 ---

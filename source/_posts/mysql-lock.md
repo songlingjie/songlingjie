@@ -2,7 +2,9 @@
 title: 关于MySQL锁的一些思考
 date: 2022-03-28 21:28:08
 tags: MySQL,Lock
-categories: MySQL
+categories: 
+  - 技术笔记
+  - MySQL
 banner_img: /img/mysql_lock.jpg
 index_img: /img/mysql_lock.jpg
 ---

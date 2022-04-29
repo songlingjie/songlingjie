@@ -2,7 +2,9 @@
 title: Tcp中的GBN
 date: 2021-09-09 15:50:24
 tags: 网络
-categories: 网络
+categories: 
+  - 技术笔记
+  - 网络
 banner_img: /img/tcp_gbn.jpeg
 index_img: /img/tcp_gbn.jpeg
 ---

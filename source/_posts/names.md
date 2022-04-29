@@ -2,8 +2,10 @@
 title: 一些名词
 date: 2018-09-29 22:58:24
 tags:
-categories: 网络
-banner_img: /img/tcb_names.jpeg
+categories: 
+  - 技术笔记
+  - 网络
+banner_img: https://cdn.wallpaperhub.app/cloudcache/4/3/6/9/4/f/43694fffa324f1478712c2f6ce7dfccf76ca9a3e.jpg
 index_img: /img/tcb_names.jpeg
 ---
 

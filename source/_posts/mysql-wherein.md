@@ -2,8 +2,10 @@
 title: 记录一次WhereIn没有使用到索引的排查过程
 date: 2022-02-13 22:11:41
 tags: MySQL,索引
-categories: MySQL
-banner_img: /img/mysql_wherein.jpeg
+categories: 
+  - 技术笔记
+  - MySQL
+banner_img: https://cdn.wallpaperhub.app/cloudcache/4/f/a/5/b/e/4fa5be09918d02e0068ad2b10af666bc84ff9d26.jpg
 index_img: /img/mysql_wherein.jpeg
 ---
 

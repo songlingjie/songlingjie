@@ -2,7 +2,9 @@
 title: 设计模式的一些理论基础
 date: 2021-09-08 10:05:23
 tags: 设计模式
-categories: 设计模式
+categories: 
+  - 技术笔记
+  - 设计模式
 banner_img: /img/design_patterns.jpg
 index_img: /img/design_patterns.jpg
 ---

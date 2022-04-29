@@ -2,7 +2,9 @@
 title: Tcp小结
 date: 2021-09-16 17:04:23
 tags: 网络
-categories: 网络
+categories: 
+  - 技术笔记
+  - 网络
 banner_img: /img/tcp_end.jpg
 index_img: /img/tcp_end.jpg
 ---

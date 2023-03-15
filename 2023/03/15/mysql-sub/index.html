@@ -16,23 +16,23 @@
   <meta name="author" content="宋玲杰">
   <meta name="keywords" content="">
   
-    <meta name="description" content="TCP 中的 SR(选择重传)">
+    <meta name="description" content="什么时候分库分表 分库 磁盘读IO瓶颈，热点数据太多，数据库缓存放不下，每次查询时会产生大量的IO，降低查询速度 -&gt; 分库和垂直分表。 网络IO瓶颈，请求的数据太多，网络带宽不够 -&gt; 分库   分表 单表数据量太大，查询时扫描的行太多，SQL效率低，CPU率先出现瓶颈 -&gt; 水平分表    概念 水平分表 概念：以字段为依据，按照一定策略（hash、range等），将一个表中">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Tcp中的SR(选择重传)">
-<meta property="og:url" content="https://songlingjie.github.io/2021/09/09/tcp-sr/index.html">
+<meta property="og:title" content="关于分库分表的总结记录">
+<meta property="og:url" content="https://songlingjie.github.io/2023/03/15/mysql-sub/index.html">
 <meta property="og:site_name" content="宋玲杰的个人博客">
-<meta property="og:description" content="TCP 中的 SR(选择重传)">
+<meta property="og:description" content="什么时候分库分表 分库 磁盘读IO瓶颈，热点数据太多，数据库缓存放不下，每次查询时会产生大量的IO，降低查询速度 -&gt; 分库和垂直分表。 网络IO瓶颈，请求的数据太多，网络带宽不够 -&gt; 分库   分表 单表数据量太大，查询时扫描的行太多，SQL效率低，CPU率先出现瓶颈 -&gt; 水平分表    概念 水平分表 概念：以字段为依据，按照一定策略（hash、range等），将一个表中">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://cdn.wallpaperhub.app/cloudcache/a/9/a/2/a/9/a9a2a931999de2c4ba7dc6575ffcc9a85e2eaef2.jpg">
-<meta property="article:published_time" content="2021-09-09T07:09:13.000Z">
-<meta property="article:modified_time" content="2023-03-15T08:48:22.779Z">
+<meta property="og:image" content="https://cdn.wallpaperhub.app/cloudcache/5/0/a/f/d/5/50afd52a90520bd017bee5d6e0fc416665e8f048.jpg">
+<meta property="article:published_time" content="2023-03-15T07:11:41.000Z">
+<meta property="article:modified_time" content="2023-03-15T09:32:01.038Z">
 <meta property="article:author" content="宋玲杰">
-<meta property="article:tag" content="网络">
+<meta property="article:tag" content="MySQL">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://cdn.wallpaperhub.app/cloudcache/a/9/a/2/a/9/a9a2a931999de2c4ba7dc6575ffcc9a85e2eaef2.jpg">
+<meta name="twitter:image" content="https://cdn.wallpaperhub.app/cloudcache/5/0/a/f/d/5/50afd52a90520bd017bee5d6e0fc416665e8f048.jpg">
   
   
-  <title>Tcp中的SR(选择重传) - 宋玲杰的个人博客</title>
+  <title>关于分库分表的总结记录 - 宋玲杰的个人博客</title>
 
   <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
@@ -167,12 +167,12 @@
 </nav>
 
     <div class="banner" id="banner" parallax=true
-         style="background: url('https://cdn.wallpaperhub.app/cloudcache/6/4/c/b/f/b/64cbfbcb69a590c8d42fdb09dccb7b69f7f40cb3.jpg') no-repeat center center;
+         style="background: url('https://cdn.wallpaperhub.app/cloudcache/e/9/e/a/3/d/e9ea3d767d495faba38e5a96d3502856b93480ec.jpg') no-repeat center center;
            background-size: cover;">
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
           <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="Tcp中的SR(选择重传)">
+            <span class="h2" id="subtitle" title="关于分库分表的总结记录">
               
             </span>
 
@@ -182,8 +182,8 @@
   
     <span class="post-meta">
       <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-      <time datetime="2021-09-09 15:09" pubdate>
-        2021年9月9日 下午
+      <time datetime="2023-03-15 15:11" pubdate>
+        2023年3月15日 下午
       </time>
     </span>
   
@@ -193,7 +193,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      13 字
+      873 字
     </span>
   
 
@@ -202,7 +202,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      1 分钟
+      8 分钟
     </span>
   
 
@@ -231,11 +231,50 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">Tcp中的SR(选择重传)</h1>
+            <h1 style="display: none">关于分库分表的总结记录</h1>
             
             <div class="markdown-body">
-              <p>TCP 中的 SR(选择重传)</p>
-<p><img src="https://tva1.sinaimg.cn/large/e6c9d24ely1h1ptkk5w23j20o30mlabq.jpg" srcset="/img/loading.gif" lazyload alt="2295E331-B060-4C01-B178-3FDF05FC2691"></p>
+              <h3 id="什么时候分库分表"><a href="#什么时候分库分表" class="headerlink" title="什么时候分库分表"></a>什么时候分库分表</h3><ul>
+<li>分库<ul>
+<li>磁盘读IO瓶颈，热点数据太多，数据库缓存放不下，每次查询时会产生大量的IO，降低查询速度 -&gt; 分库和垂直分表。</li>
+<li>网络IO瓶颈，请求的数据太多，网络带宽不够 -&gt; 分库</li>
+</ul>
+</li>
+<li>分表<ul>
+<li>单表数据量太大，查询时扫描的行太多，SQL效率低，CPU率先出现瓶颈 -&gt; 水平分表</li>
+</ul>
+</li>
+</ul>
+<h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><ul>
+<li>水平分表<ul>
+<li>概念：以字段为依据，按照一定策略（hash、range等），将一个表中的数据拆分到多个表中</li>
+<li>结果：每个表的结构都一样、每个表的数据都不一样，没有交集、所有表的并集是全量数据</li>
+<li>场景：系统绝对并发量并没有上来，只是单表的数据量太多，影响了SQL效率，加重了CPU负担，以至于成为瓶颈</li>
+<li>分析：表的数据量少了，单次SQL执行效率高，自然减轻了CPU的负担</li>
+</ul>
+</li>
+<li>水平分库<ul>
+<li>概念：以字段为依据，按照一定策略（hash、range等），将一个库中的数据拆分到多个表中</li>
+<li>结果：每个库的结构都一样、每个库的数据都不一样，没有交集、所有库的并集是全量数据</li>
+<li>场景：系统绝对并发量上来了，分表难以根本上解决问题，并且还没有明显的业务归属来垂直分库</li>
+<li>分析：库多了，io和cpu的压力自然可以成倍缓解</li>
+</ul>
+</li>
+<li>垂直分库<ul>
+<li>概念：以表为依据，按照业务归属不同，将不同的表拆分到不同的库中</li>
+<li>结果：每个库的结构都不一样、每个库的数据都不一样，没有交集、所有库的并集是全量数据</li>
+<li>场景：系统绝对并发量上来了并且可以抽象出单独的业务模块</li>
+<li>分析：可以对单库服务化</li>
+</ul>
+</li>
+<li>垂直分表<ul>
+<li>概念：以字段为依据，按照字段的活跃性，将表中字段拆到不同的表（主表和扩展表）中</li>
+<li>结果： 每个表的结构都不一样、一般来说，每个表的字段至少有一列交集，一般是主键，用于关联数据、所有表的并集是全量数据</li>
+<li>场景：系统绝对并发量并没有上来，表的记录并不多，但是字段多，并且热点数据和非热点数据在一起，单行数据所需的存储空间较大。以至于数据库缓存的数据行减少，查询时会去读磁盘数据产生大量的随机读IO，产生IO瓶颈</li>
+<li>分析：垂直分表的拆分原则是将热点数据（可能会冗余经常一起查询的数据）放在一起作为主表，非热点数据放在一起作为扩展表。这样更多的热点数据就能被缓存下来，进而减少了随机读IO</li>
+</ul>
+</li>
+</ul>
 
             </div>
             <hr>
@@ -247,7 +286,7 @@
                     
                       <a class="hover-with-bg" href="/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/">技术笔记</a>
                     
-                      <a class="hover-with-bg" href="/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/%E7%BD%91%E7%BB%9C/">网络</a>
+                      <a class="hover-with-bg" href="/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/MySQL/">MySQL</a>
                     
                   </div>
                 
@@ -255,7 +294,7 @@
                   <div class="post-meta">
                     <i class="iconfont icon-tags"></i>
                     
-                      <a class="hover-with-bg" href="/tags/%E7%BD%91%E7%BB%9C/">网络</a>
+                      <a class="hover-with-bg" href="/tags/MySQL/">MySQL</a>
                     
                   </div>
                 
@@ -272,18 +311,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2021/09/09/tcp-gbn/">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Tcp中的GBN</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2021/09/08/design-patterns/">
-                        <span class="hidden-mobile">设计模式的一些理论基础</span>
+                      <a href="/2022/05/17/spike/">
+                        <span class="hidden-mobile">如何实现一个秒杀系统</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

@@ -1,0 +1,502 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/avatar.webp">
+  <link rel="icon" href="/img/avatar.webp">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="宋玲杰">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="背景 字段summary_id是表已经有一千多万数据之后新增的，历史数据默认值为0 ，加好summary_id字段后新增了索引：idx_summary_id  sql查询没有用索引，猜测是和索引的基数有关，MySQL in查询能不能用到索引主要是看使用索引的成本和全表扫描的成本那个更低。下面是证实排查过程  没有用到索引的sql语句为   1select * from &#96;btb_bid_user_">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记录一次WhereIn没有使用到索引的排查过程">
+<meta property="og:url" content="https://songlingjie.github.io/2022/02/13/mysql-wherein/index.html">
+<meta property="og:site_name" content="宋玲杰的个人博客">
+<meta property="og:description" content="背景 字段summary_id是表已经有一千多万数据之后新增的，历史数据默认值为0 ，加好summary_id字段后新增了索引：idx_summary_id  sql查询没有用索引，猜测是和索引的基数有关，MySQL in查询能不能用到索引主要是看使用索引的成本和全表扫描的成本那个更低。下面是证实排查过程  没有用到索引的sql语句为   1select * from &#96;btb_bid_user_">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://songlingjie.github.io/img/mysql_wherein.jpeg">
+<meta property="article:published_time" content="2022-02-13T14:11:41.000Z">
+<meta property="article:modified_time" content="2022-04-29T03:18:05.086Z">
+<meta property="article:author" content="宋玲杰">
+<meta property="article:tag" content="MySQL,索引">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://songlingjie.github.io/img/mysql_wherein.jpeg">
+  
+  
+  <title>记录一次WhereIn没有使用到索引的排查过程 - 宋玲杰的个人博客</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"songlingjie.github.io","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://cdn.wallpaperhub.app/cloudcache/4/f/a/5/b/e/4fa5be09918d02e0068ad2b10af666bc84ff9d26.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="记录一次WhereIn没有使用到索引的排查过程">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2022-02-13 22:11" pubdate>
+        2022年2月13日 晚上
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      4.7k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      40 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">记录一次WhereIn没有使用到索引的排查过程</h1>
+            
+            <div class="markdown-body">
+              <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><ul>
+<li><p>字段summary_id是表已经有一千多万数据之后新增的，历史数据默认值为0 ，加好summary_id字段后新增了索引：idx_summary_id</p>
+</li>
+<li><p>sql查询没有用索引，猜测是和索引的基数有关，MySQL in查询能不能用到索引主要是看使用索引的成本和全表扫描的成本那个更低。下面是证实排查过程</p>
+</li>
+<li><p>没有用到索引的sql语句为</p>
+</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> `btb_bid_user_apply` <span class="hljs-keyword">where</span> summary_id <span class="hljs-keyword">in</span> (<span class="hljs-number">108</span>,<span class="hljs-number">156</span>,<span class="hljs-number">166</span>,<span class="hljs-number">167</span>,<span class="hljs-number">168</span>,<span class="hljs-number">170</span>,<span class="hljs-number">172</span>,<span class="hljs-number">174</span>,<span class="hljs-number">176</span>,<span class="hljs-number">178</span>,<span class="hljs-number">179</span>,<span class="hljs-number">193</span>,<span class="hljs-number">196</span>);<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>表结构，省略了无关字段</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> `btb_bid_user_apply` (<br>  `id` <span class="hljs-type">int</span>(<span class="hljs-number">11</span>) unsigned <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> AUTO_INCREMENT,<br>  `summary_id` <span class="hljs-type">int</span>(<span class="hljs-number">11</span>) unsigned <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-string">&#x27;0&#x27;</span> COMMENT <span class="hljs-string">&#x27;出价汇总表id&#x27;</span><br>  KEY `idx_summary_id` (`summary_id`)<br>) ENGINE<span class="hljs-operator">=</span>InnoDB AUTO_INCREMENT<span class="hljs-operator">=</span><span class="hljs-number">15526682</span> <span class="hljs-keyword">DEFAULT</span> CHARSET<span class="hljs-operator">=</span>utf8 ROW_FORMAT<span class="hljs-operator">=</span>COMPRESSED KEY_BLOCK_SIZE<span class="hljs-operator">=</span><span class="hljs-number">8</span>;<br></code></pre></td></tr></table></figure>
+
+
+<h3 id="排查过程"><a href="#排查过程" class="headerlink" title="排查过程"></a>排查过程</h3><ul>
+<li>第一步 查询 eq_range_index_dive_limit（SHOW VARIABLES LIKE ‘%dive%’;）线上结果为10，<ul>
+<li><p>这个系统变量的意思是，当in语句中的参数个数大于或等于系统变量eq_range_index_dive_limit 时 不会使用index dive 计算单个区间节点对应的索引记录条数，而是使用索引统计数据</p>
+</li>
+<li><p>查出 idx_summary_id的Cardinality&#x3D;1，Rows&#x3D; 13945557，这里计算单个区间节点对应的索引记录数 &#x3D; 13945557 &#x2F; 1, 总索引记录数为 13945557 * 13 &#x3D; 181292241</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>​				 					</p>
+<ul>
+<li><p>第二步 使用optimizer_trace 分析查询成本</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs sql">#开启查询分析<br><span class="hljs-keyword">SET</span> optimizer_trace<span class="hljs-operator">=</span>&quot;enabled=on&quot;;<br><br><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> `btb_bid_user_apply` <span class="hljs-keyword">where</span> summary_id <span class="hljs-keyword">in</span> (<span class="hljs-number">108</span>,<span class="hljs-number">156</span>,<span class="hljs-number">166</span>,<span class="hljs-number">167</span>,<span class="hljs-number">168</span>,<span class="hljs-number">170</span>,<span class="hljs-number">172</span>,<span class="hljs-number">174</span>,<span class="hljs-number">176</span>,<span class="hljs-number">178</span>,<span class="hljs-number">179</span>,<span class="hljs-number">193</span>,<span class="hljs-number">196</span>);<br><br>#查询刚执行的语句的优化过程<br><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> information_schema.OPTIMIZER_TRACE; <br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><p>查询优化过程主要信息</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><code class="hljs json"># 预估不同单表访问方法的访问成本<br><span class="hljs-punctuation">&#123;</span><br>    <span class="hljs-attr">&quot;rows_estimation&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">&#123;</span><br>        <span class="hljs-attr">&quot;table&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;`btb_bid_user_apply`&quot;</span><span class="hljs-punctuation">,</span> # 全表扫描的行数以及成本<br>        <span class="hljs-attr">&quot;range_analysis&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>            <span class="hljs-attr">&quot;table_scan&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>                <span class="hljs-attr">&quot;rows&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">13945557</span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;cost&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2870000</span><br>            <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><br>            # 分析可能使用的索引<br>            <span class="hljs-attr">&quot;potential_range_indexes&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">&#123;</span><br>                <span class="hljs-attr">&quot;index&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;PRIMARY&quot;</span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;usable&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">false</span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;cause&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;not_applicable&quot;</span><br>            <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><span class="hljs-punctuation">&#123;</span><br>                <span class="hljs-attr">&quot;index&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;idx_summary_id&quot;</span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;usable&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">true</span><span class="hljs-punctuation">,</span>#可能被使用<br>                <span class="hljs-attr">&quot;key_parts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;summary_id&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;id&quot;</span><span class="hljs-punctuation">]</span><br>            <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span><br>            <span class="hljs-attr">&quot;setup_range_conditions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span><br>            <span class="hljs-attr">&quot;group_index_range&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>                <span class="hljs-attr">&quot;chosen&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">false</span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;cause&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;not_group_by_or_distinct&quot;</span><br>            <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><br>						# 分析各种可能使用的索引的成本<br>            <span class="hljs-attr">&quot;analyzing_range_alternatives&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>                <span class="hljs-attr">&quot;range_scan_alternatives&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">&#123;</span><br>                    <span class="hljs-attr">&quot;index&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;idx_summary_id&quot;</span><span class="hljs-punctuation">,</span><br>                    <span class="hljs-attr">&quot;ranges&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;108 &lt;= summary_id &lt;= 108&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;156 &lt;= summary_id &lt;= 156&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;166 &lt;= summary_id &lt;= 166&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;167 &lt;= summary_id &lt;= 167&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;168 &lt;= summary_id &lt;= 168&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;170 &lt;= summary_id &lt;= 170&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;172 &lt;= summary_id &lt;= 172&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;174 &lt;= summary_id &lt;= 174&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;176 &lt;= summary_id &lt;= 176&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;178 &lt;= summary_id &lt;= 178&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;179 &lt;= summary_id &lt;= 179&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;193 &lt;= summary_id &lt;= 193&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;196 &lt;= summary_id &lt;= 196&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span><br>                    <span class="hljs-attr">&quot;index_dives_for_eq_ranges&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">false</span><span class="hljs-punctuation">,</span>   # 是否使用index dive<br>                    <span class="hljs-attr">&quot;rowid_ordered&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">false</span><span class="hljs-punctuation">,</span>  # 使用该索引获取的记录是否按照主键排序<br>                    <span class="hljs-attr">&quot;using_mrr&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">true</span><span class="hljs-punctuation">,</span># 是否使用mrr<br>                    <span class="hljs-attr">&quot;index_only&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">false</span><span class="hljs-punctuation">,</span> #是否是索引覆盖访问<br>                    <span class="hljs-attr">&quot;rows&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">181292241</span><span class="hljs-punctuation">,</span>  #使用该索引获取的记录条数和第一步计算的扫描行数一样<br>                    <span class="hljs-attr">&quot;cost&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">199000000</span><span class="hljs-punctuation">,</span> # 使用该索引的成本<br>                    <span class="hljs-attr">&quot;chosen&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">false</span><span class="hljs-punctuation">,</span> # 是否选择该索引<br>                    <span class="hljs-attr">&quot;cause&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;cost&quot;</span><br>                <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;analyzing_roworder_intersect&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>                    <span class="hljs-attr">&quot;usable&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">false</span><span class="hljs-punctuation">,</span><br>                    <span class="hljs-attr">&quot;cause&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;too_few_roworder_scans&quot;</span><br>                <span class="hljs-punctuation">&#125;</span><br>            <span class="hljs-punctuation">&#125;</span><br>        <span class="hljs-punctuation">&#125;</span><br>    <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">]</span><br><span class="hljs-punctuation">&#125;</span><br><br>#最终使用的查询计划，可以看到使用全表扫描<br><span class="hljs-punctuation">&#123;</span><br>    <span class="hljs-attr">&quot;considered_execution_plans&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">&#123;</span><br>        <span class="hljs-attr">&quot;plan_prefix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;table&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;`btb_bid_user_apply`&quot;</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;best_access_path&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>            <span class="hljs-attr">&quot;considered_access_paths&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">&#123;</span><br>                <span class="hljs-attr">&quot;rows_to_scan&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">13945557</span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;access_type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;scan&quot;</span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;resulting_rows&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">13900000</span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;cost&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2870000</span><span class="hljs-punctuation">,</span> <br>                <span class="hljs-attr">&quot;chosen&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">true</span><br>            <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">]</span><br>        <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;condition_filtering_pct&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">100</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;rows_for_plan&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">13900000</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;cost_for_plan&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2870000</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;chosen&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">true</span><br>    <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">]</span><br><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+</li>
+<li><div class="code-wrapper"><pre><code class="hljs">第三步 解释和验证查询成本
+</code></pre></div>
+<ul>
+<li><div class="code-wrapper"><pre><code class="hljs">MySQL 将 IO 成本设为1，cpu 判断成本设为0.2。IO成本是扫描一页的成本，对于回表操作的IO成本是每回表一次相当于一次磁盘IO
+</code></pre></div>
+</li>
+<li><div class="code-wrapper"><pre><code class="hljs">扫描全表的计算方式 （ 聚簇索引叶子节点数 * 1  + 1） + （记录数*0.2+1）, 聚簇索引叶子节点数  通过show table status like &quot;%btb_bid_user_apply%&quot;  中的 Data_length / 16/1024 计算得出，本次查询的  聚簇索引叶子节点数大概为 646971392/16/1024=39488，成本为：39488 + 13945557*0.2 =2828599，接近于查询成本分析的 2870000
+</code></pre></div>
+</li>
+<li><div class="code-wrapper"><pre><code class="hljs">通过查询索引 idx_summary_id 成本： 181292241*1 + ( 181292241*0.2 ) =217550689，与查询成本分析 199000000 多了一千七百多万，暂时还不清楚具体原因
+</code></pre></div>
+<ul>
+<li><div class="code-wrapper"><pre><code class="hljs">181292241*1 表示 回表的IO成本
+</code></pre></div>
+</li>
+<li><div class="code-wrapper"><pre><code class="hljs"> ( 181292241*0.2 ) 表示回表之后 cpu 计算的成本
+</code></pre></div>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h3><ul>
+<li>关于in 能不能用到索引 主要还是看 使用索引的成本的全表扫描成本那个小<ul>
+<li><p>全表扫描成本：（ 聚簇索引叶子节点数 * 1 + 1） + （记录数*0.2+1） </p>
+<ul>
+<li>聚簇索引叶子节点数：通过show table status like “%btb_bid_user_apply%”  中的 Data_length &#x2F; 16&#x2F;1024 计算得出</li>
+</ul>
+</li>
+<li><p>查询索引的成本：当in语句中的参数个数小于系统变量eq_range_index_dive_limit 使用index dive 否则使用索引统计数据</p>
+<ul>
+<li><p>index dive：是计算单个区间节点的对应索引记录数的一种方式，其主要原理是先获取索引对应的<code>B+</code>树的<code>区间最左记录</code>和<code>区间最右记录</code>，然后再计算这两条记录之间有多少记录（记录条数少的时候可以做到精确计算，多的时候只能估算）。这种通过直接访问索引对应的<code>B+</code>树来计算某个范围区间对应的索引记录条数的方式称之为<code>index dive</code></p>
+</li>
+<li><p>单个区间节点是 in查询会转换的范围查</p>
+</li>
+<li><p>索引统计数据 是 用估算的方式来计算出单个区间节点对应的索引记录数量，涉及到两个值，Cardinality（索引基数，通过show index from table_name） 和 Rows（总记录数 通过 show table status like “%table_name%”;） 总记录数&#x2F;索引基数*in语句中的参数个数&#x3D;估算的扫描条数；</p>
+</li>
+<li><p>查询成本 &#x3D; 估算的扫描条数*1 + （估算的扫描条数 *0.2）</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/">技术笔记</a>
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/MySQL/">MySQL</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/MySQL-%E7%B4%A2%E5%BC%95/">MySQL,索引</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2022/03/28/mysql-lock/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">关于MySQL锁的一些思考</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2021/09/16/tcp/">
+                        <span class="hidden-mobile">Tcp小结</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+  </div>
+  
+
+  
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

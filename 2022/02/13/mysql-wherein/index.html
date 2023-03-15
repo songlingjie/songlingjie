@@ -23,13 +23,13 @@
 <meta property="og:site_name" content="宋玲杰的个人博客">
 <meta property="og:description" content="背景 字段summary_id是表已经有一千多万数据之后新增的，历史数据默认值为0 ，加好summary_id字段后新增了索引：idx_summary_id  sql查询没有用索引，猜测是和索引的基数有关，MySQL in查询能不能用到索引主要是看使用索引的成本和全表扫描的成本那个更低。下面是证实排查过程  没有用到索引的sql语句为   1select * from &#96;btb_bid_user_">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://songlingjie.github.io/img/mysql_wherein.jpeg">
+<meta property="og:image" content="https://cdn.wallpaperhub.app/cloudcache/e/c/b/b/b/2/ecbbb2b4786d5a8e3fa86c276eb2dffa6a47fdea.jpg">
 <meta property="article:published_time" content="2022-02-13T14:11:41.000Z">
-<meta property="article:modified_time" content="2022-04-29T03:18:05.086Z">
+<meta property="article:modified_time" content="2023-03-15T08:44:27.958Z">
 <meta property="article:author" content="宋玲杰">
 <meta property="article:tag" content="MySQL,索引">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://songlingjie.github.io/img/mysql_wherein.jpeg">
+<meta name="twitter:image" content="https://cdn.wallpaperhub.app/cloudcache/e/c/b/b/b/2/ecbbb2b4786d5a8e3fa86c276eb2dffa6a47fdea.jpg">
   
   
   <title>记录一次WhereIn没有使用到索引的排查过程 - 宋玲杰的个人博客</title>
@@ -167,7 +167,7 @@
 </nav>
 
     <div class="banner" id="banner" parallax=true
-         style="background: url('https://cdn.wallpaperhub.app/cloudcache/4/f/a/5/b/e/4fa5be09918d02e0068ad2b10af666bc84ff9d26.jpg') no-repeat center center;
+         style="background: url('https://cdn.wallpaperhub.app/cloudcache/1/7/1/6/5/0/1716501b654d98eb1a8b54faa5f08b56bb22416f.jpg') no-repeat center center;
            background-size: cover;">
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">

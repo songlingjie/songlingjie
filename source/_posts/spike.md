@@ -4,7 +4,7 @@ date: 2022-05-17 16:21:48
 tags:
 categories: 
   - 读书笔记
-banner_img: https://cdn.wallpaperhub.app/cloudcache/6/0/4/b/b/7/604bb787c972e39a60261606937d67891edd5799.jpg
+banner_img: https://cdn.wallpaperhub.app/cloudcache/8/b/1/a/b/c/8b1abc1df7600e44e2eb3c5a0c9f3d237c75fd9c.jpg
 index_img: https://cdn.wallpaperhub.app/cloudcache/6/0/4/b/b/7/604bb787c972e39a60261606937d67891edd5799.jpg
 ---
 

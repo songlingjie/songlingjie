@@ -5,8 +5,8 @@ tags: 设计模式
 categories: 
   - 技术笔记
   - 设计模式
-banner_img: /img/design_patterns.jpg
-index_img: /img/design_patterns.jpg
+banner_img: https://cdn.wallpaperhub.app/cloudcache/8/6/c/9/0/2/86c902c4aa4d6f371a1998d1cf323f6270ccbb59.jpg
+index_img: https://cdn.wallpaperhub.app/cloudcache/8/6/c/9/0/2/86c902c4aa4d6f371a1998d1cf323f6270ccbb59.jpg
 ---
 
 

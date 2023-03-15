@@ -5,8 +5,8 @@ tags: MySQL,Lock
 categories: 
   - 技术笔记
   - MySQL
-banner_img: /img/mysql_lock.jpg
-index_img: /img/mysql_lock.jpg
+banner_img: https://cdn.wallpaperhub.app/cloudcache/a/a/6/5/1/1/aa651118a1873e7be518e57da2adc2b146fd9acb.jpg
+index_img: https://cdn.wallpaperhub.app/cloudcache/3/8/9/4/f/d/3894fd0a4fc3ea7f9d6c873e8ff3110d66508c9c.jpg
 ---
 
 ### 锁是什么以及为什么要加锁？

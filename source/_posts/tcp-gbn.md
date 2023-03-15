@@ -5,8 +5,8 @@ tags: 网络
 categories: 
   - 技术笔记
   - 网络
-banner_img: /img/tcp_gbn.jpeg
-index_img: /img/tcp_gbn.jpeg
+banner_img: https://cdn.wallpaperhub.app/cloudcache/5/5/f/5/1/4/55f5149ba5091818e9f55538bd7e3f3e2da24baa.jpg
+index_img: https://cdn.wallpaperhub.app/cloudcache/0/3/c/5/5/7/03c557841515d62828bca77ce811edd4cafef3af.jpg
 ---
 Tcp 中的 GBN(go back n ,回退N步)
 ```php

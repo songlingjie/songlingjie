@@ -5,8 +5,8 @@ tags: MySQL,索引
 categories: 
   - 技术笔记
   - MySQL
-banner_img: https://cdn.wallpaperhub.app/cloudcache/4/f/a/5/b/e/4fa5be09918d02e0068ad2b10af666bc84ff9d26.jpg
-index_img: /img/mysql_wherein.jpeg
+banner_img: https://cdn.wallpaperhub.app/cloudcache/1/7/1/6/5/0/1716501b654d98eb1a8b54faa5f08b56bb22416f.jpg
+index_img: https://cdn.wallpaperhub.app/cloudcache/e/c/b/b/b/2/ecbbb2b4786d5a8e3fa86c276eb2dffa6a47fdea.jpg
 ---
 
 ### 背景

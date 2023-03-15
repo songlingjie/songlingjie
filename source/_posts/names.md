@@ -5,8 +5,8 @@ tags:
 categories: 
   - 技术笔记
   - 网络
-banner_img: https://cdn.wallpaperhub.app/cloudcache/4/3/6/9/4/f/43694fffa324f1478712c2f6ce7dfccf76ca9a3e.jpg
-index_img: /img/tcb_names.jpeg
+banner_img: https://cdn.wallpaperhub.app/cloudcache/7/2/8/2/3/f/72823f97f75d73b9fc54a239c22e4ff138550a32.jpg
+index_img: https://cdn.wallpaperhub.app/cloudcache/3/7/d/d/f/a/37ddfa6ed73f24693ab3f7008476a4cc44ae3a63.jpg
 ---
 
 网络七层协议

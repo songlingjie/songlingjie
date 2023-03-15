@@ -5,8 +5,8 @@ tags: 网络
 categories: 
   - 技术笔记
   - 网络
-banner_img: /img/tcp_end.jpg
-index_img: /img/tcp_end.jpg
+banner_img: https://cdn.wallpaperhub.app/cloudcache/a/4/8/8/1/b/a4881b58185419b3ceab68e01a64748ddfc19581.jpg
+index_img: https://cdn.wallpaperhub.app/cloudcache/b/f/2/c/5/5/bf2c559f1160bc0c04fe922f7243868208be3cb0.jpg
 ---
 
 #### tcp 是基于连接、可靠的传输层的应用协议

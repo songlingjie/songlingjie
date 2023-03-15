@@ -2,7 +2,7 @@
 title: 关于
 layout: about
 date: 2022-04-28 17:54:32
-banner_img: /img/index.jpg
+banner_img: https://cdn.wallpaperhub.app/cloudcache/c/2/5/0/8/a/c2508a2effcf114005605ba7285de1aa74bdfad6.jpg
 ---
 
 这里是宋玲杰的博客。
